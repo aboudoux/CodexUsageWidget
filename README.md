@@ -21,3 +21,19 @@ L'executable final est genere dans `dist\CodexUsageWidget.exe`.
 
 Le widget utilise l'authentification existante de Codex CLI via
 `codex app-server`. Aucun token ni aucune cle API ne sont stockes.
+
+## Creer l'installateur
+
+Installer Inno Setup 6 une seule fois :
+
+```powershell
+winget install --exact --id JRSoftware.InnoSetup
+```
+
+Puis executer :
+
+```powershell
+.\installer\build-installer.ps1
+```
+
+Le wizard autonome est genere dans `installer-output`.
