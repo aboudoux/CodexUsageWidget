@@ -1,0 +1,180 @@
+<Window x:Class="CodexUsageWidget.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Utilisation Codex"
+        Width="310"
+        Height="320"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        FontFamily="Segoe UI"
+        Foreground="#F5F5F5"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Loaded="Window_Loaded"
+        Closing="Window_Closing"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown">
+    <Border Background="{StaticResource PanelBrush}"
+            BorderBrush="#3B3B3B"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="16">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="18"
+                              ShadowDepth="4"
+                              Opacity="0.4"
+                              Color="#000000"/>
+        </Border.Effect>
+        <Border.ContextMenu>
+            <ContextMenu>
+                <MenuItem Header="Actualiser" Click="RefreshMenuItem_Click"/>
+                <MenuItem Header="Ouvrir Codex Analytics" Click="OpenAnalyticsMenuItem_Click"/>
+                <Separator/>
+                <MenuItem x:Name="StartWithWindowsMenuItem"
+                          Header="Demarrer avec Windows"
+                          IsCheckable="True"
+                          Click="StartWithWindowsMenuItem_Click"/>
+                <Separator/>
+                <MenuItem Header="Quitter" Click="ExitMenuItem_Click"/>
+            </ContextMenu>
+        </Border.ContextMenu>
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Utilisation restante"
+                               FontSize="14"
+                               FontWeight="SemiBold"/>
+                    <TextBlock x:Name="StatusText"
+                               Text="Connexion a Codex..."
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="10"
+                               Margin="0,3,0,0"/>
+                </StackPanel>
+                <Button Grid.Column="1"
+                        Content="Actualiser"
+                        FontSize="10"
+                        Padding="8,4"
+                        VerticalAlignment="Center"
+                        Background="#343434"
+                        Foreground="#EAEAEA"
+                        BorderBrush="#4A4A4A"
+                        Cursor="Hand"
+                        Click="RefreshButton_Click"/>
+            </Grid>
+
+            <Grid Grid.Row="1" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="5 heures" FontWeight="SemiBold"/>
+                <TextBlock x:Name="PrimaryPercentText"
+                           Grid.Column="1"
+                           Text="-- %"
+                           FontSize="15"
+                           FontWeight="Bold"/>
+                <ProgressBar x:Name="PrimaryProgress"
+                             Grid.Row="1"
+                             Grid.ColumnSpan="2"
+                             Margin="0,7,0,5"
+                             Maximum="100"/>
+                <TextBlock x:Name="PrimaryResetText"
+                           Grid.Row="2"
+                           Grid.ColumnSpan="2"
+                           Text="Reinitialisation inconnue"
+                           Foreground="{StaticResource MutedBrush}"
+                           FontSize="10"/>
+            </Grid>
+
+            <Grid Grid.Row="2" Margin="0,0,0,15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="Hebdomadaire" FontWeight="SemiBold"/>
+                <TextBlock x:Name="SecondaryPercentText"
+                           Grid.Column="1"
+                           Text="-- %"
+                           FontSize="15"
+                           FontWeight="Bold"/>
+                <ProgressBar x:Name="SecondaryProgress"
+                             Grid.Row="1"
+                             Grid.ColumnSpan="2"
+                             Margin="0,7,0,5"
+                             Maximum="100"/>
+                <TextBlock x:Name="SecondaryResetText"
+                           Grid.Row="2"
+                           Grid.ColumnSpan="2"
+                           Text="Reinitialisation inconnue"
+                           Foreground="{StaticResource MutedBrush}"
+                           FontSize="10"/>
+            </Grid>
+
+            <Border Grid.Row="3"
+                    Background="#2D2D2D"
+                    CornerRadius="7"
+                    Padding="10,7">
+                <Grid>
+                    <TextBlock Text="Credits restants"
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="11"/>
+                    <TextBlock x:Name="CreditsText"
+                               Text="--"
+                               HorizontalAlignment="Right"
+                               FontWeight="Bold"
+                               FontSize="14"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="4"
+                    Background="#2D2D2D"
+                    CornerRadius="7"
+                    Padding="10,7"
+                    Margin="0,8,0,0"
+                    ToolTip="Cumul de la conversation Codex locale la plus recente. Ce nombre n'est pas le quota de l'abonnement.">
+                <Grid>
+                    <TextBlock Text="Tokens - conversation recente"
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="11"/>
+                    <TextBlock x:Name="TokensText"
+                               Text="--"
+                               HorizontalAlignment="Right"
+                               FontWeight="Bold"
+                               FontSize="14"/>
+                </Grid>
+            </Border>
+
+            <TextBlock Grid.Row="5"
+                       Text="Clic droit pour les options"
+                       HorizontalAlignment="Center"
+                       Foreground="#777777"
+                       FontSize="9"
+                       Margin="0,10,0,0"/>
+        </Grid>
+    </Border>
+</Window>

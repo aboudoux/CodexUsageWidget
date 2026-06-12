@@ -1,0 +1,15 @@
+<Application x:Class="CodexUsageWidget.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Application.Resources>
+        <SolidColorBrush x:Key="PanelBrush" Color="#242424"/>
+        <SolidColorBrush x:Key="MutedBrush" Color="#A5A5A5"/>
+        <SolidColorBrush x:Key="AccentBrush" Color="#2ECC71"/>
+        <Style TargetType="ProgressBar">
+            <Setter Property="Height" Value="7"/>
+            <Setter Property="Background" Value="#505050"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentBrush}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Application.Resources>
+</Application>
