@@ -68,6 +68,35 @@ public sealed class CodexRateLimitParserTests
     }
 
     [TestMethod]
+    public void WeeklyLimit_UsesPrimaryWithTheCurrentWeeklyOnlySchema()
+    {
+        var weekly = new RateLimitWindow(36, 10080, 1784966671);
+        var snapshot = new UsageSnapshot(
+            weekly,
+            null,
+            null,
+            "plus",
+            DateTimeOffset.UnixEpoch);
+
+        Assert.AreEqual(weekly, snapshot.WeeklyLimit);
+    }
+
+    [TestMethod]
+    public void WeeklyLimit_UsesLongestWindowFromLegacyCachedData()
+    {
+        var fiveHours = new RateLimitWindow(41, 300, 1781265283);
+        var weekly = new RateLimitWindow(38, 10080, 1781767568);
+        var snapshot = new UsageSnapshot(
+            fiveHours,
+            weekly,
+            null,
+            "plus",
+            DateTimeOffset.UnixEpoch);
+
+        Assert.AreEqual(weekly, snapshot.WeeklyLimit);
+    }
+
+    [TestMethod]
     public void RemainingPercent_IsClamped()
     {
         Assert.AreEqual(0, new RateLimitWindow(150, null, null).RemainingPercent);

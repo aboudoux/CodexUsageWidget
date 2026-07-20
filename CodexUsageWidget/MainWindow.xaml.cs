@@ -160,37 +160,26 @@ public partial class MainWindow : Window
     private void RenderSnapshot(UsageSnapshot snapshot)
     {
         RenderWindow(
-            snapshot.Primary,
-            PrimaryPercentText,
-            PrimaryProgress,
-            PrimaryResetText,
-            isWeekly: false);
-        RenderWindow(
-            snapshot.Secondary,
-            SecondaryPercentText,
-            SecondaryProgress,
-            SecondaryResetText,
-            isWeekly: true);
+            snapshot.WeeklyLimit,
+            WeeklyPercentText,
+            WeeklyProgress,
+            WeeklyResetText);
 
         CreditsText.Text = snapshot.Credits is decimal credits
             ? Math.Floor(credits).ToString("N0", CultureInfo.CurrentCulture)
             : "--";
 
-        string primary = snapshot.Primary is null
+        string weekly = snapshot.WeeklyLimit is null
             ? "--"
-            : $"{snapshot.Primary.RemainingPercent}%";
-        string secondary = snapshot.Secondary is null
-            ? "--"
-            : $"{snapshot.Secondary.RemainingPercent}%";
-        UsageSummaryChanged?.Invoke(this, $"Codex: 5 h {primary} - semaine {secondary}");
+            : $"{snapshot.WeeklyLimit.RemainingPercent}%";
+        UsageSummaryChanged?.Invoke(this, $"Codex: semaine {weekly}");
     }
 
     private static void RenderWindow(
         RateLimitWindow? window,
         System.Windows.Controls.TextBlock percentText,
         System.Windows.Controls.ProgressBar progress,
-        System.Windows.Controls.TextBlock resetText,
-        bool isWeekly)
+        System.Windows.Controls.TextBlock resetText)
     {
         if (window is null)
         {
@@ -212,7 +201,7 @@ public partial class MainWindow : Window
                 System.Windows.Media.Color.FromRgb(46, 204, 113));
         progress.Foreground = usageBrush;
         percentText.Foreground = usageBrush;
-        resetText.Text = UsageFormatting.FormatReset(window.ResetTime, isWeekly);
+        resetText.Text = UsageFormatting.FormatReset(window.ResetTime, isWeekly: true);
     }
 
     private void SetStatus(string message, bool isError)

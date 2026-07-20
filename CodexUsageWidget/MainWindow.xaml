@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Utilisation Codex"
         Width="310"
-        Height="320"
+        Height="255"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -42,7 +42,6 @@
 
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
@@ -87,47 +86,18 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="5 heures" FontWeight="SemiBold"/>
-                <TextBlock x:Name="PrimaryPercentText"
-                           Grid.Column="1"
-                           Text="-- %"
-                           FontSize="15"
-                           FontWeight="Bold"/>
-                <ProgressBar x:Name="PrimaryProgress"
-                             Grid.Row="1"
-                             Grid.ColumnSpan="2"
-                             Margin="0,7,0,5"
-                             Maximum="100"/>
-                <TextBlock x:Name="PrimaryResetText"
-                           Grid.Row="2"
-                           Grid.ColumnSpan="2"
-                           Text="Reinitialisation inconnue"
-                           Foreground="{StaticResource MutedBrush}"
-                           FontSize="10"/>
-            </Grid>
-
-            <Grid Grid.Row="2" Margin="0,0,0,15">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
                 <TextBlock Text="Hebdomadaire" FontWeight="SemiBold"/>
-                <TextBlock x:Name="SecondaryPercentText"
+                <TextBlock x:Name="WeeklyPercentText"
                            Grid.Column="1"
                            Text="-- %"
                            FontSize="15"
                            FontWeight="Bold"/>
-                <ProgressBar x:Name="SecondaryProgress"
+                <ProgressBar x:Name="WeeklyProgress"
                              Grid.Row="1"
                              Grid.ColumnSpan="2"
                              Margin="0,7,0,5"
                              Maximum="100"/>
-                <TextBlock x:Name="SecondaryResetText"
+                <TextBlock x:Name="WeeklyResetText"
                            Grid.Row="2"
                            Grid.ColumnSpan="2"
                            Text="Reinitialisation inconnue"
@@ -135,7 +105,7 @@
                            FontSize="10"/>
             </Grid>
 
-            <Border Grid.Row="3"
+            <Border Grid.Row="2"
                     Background="#2D2D2D"
                     CornerRadius="7"
                     Padding="10,7">
@@ -151,7 +121,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="4"
+            <Border Grid.Row="3"
                     Background="#2D2D2D"
                     CornerRadius="7"
                     Padding="10,7"
@@ -169,7 +139,7 @@
                 </Grid>
             </Border>
 
-            <TextBlock Grid.Row="5"
+            <TextBlock Grid.Row="4"
                        Text="Clic droit pour les options"
                        HorizontalAlignment="Center"
                        Foreground="#777777"

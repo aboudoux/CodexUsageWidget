@@ -17,29 +17,16 @@ Windows.
 
 ## Aperçu
 
-<p align="center">
-  <img src="docs/images/widget-overview.png"
-       alt="Widget affichant les quotas Codex, les crédits et les tokens"
-       width="315">
-</p>
-
 Le widget affiche :
 
-- le pourcentage restant sur la fenêtre de **5 heures** ;
 - le pourcentage restant sur la fenêtre **hebdomadaire** ;
-- l'heure ou la date de réinitialisation de chaque limite ;
+- la date et l'heure de réinitialisation de la limite ;
 - le solde de crédits disponible, lorsqu'il est fourni par Codex ;
 - les tokens cumulés de la conversation locale la plus récente ;
 - un indicateur rouge lorsqu'un quota passe sous les **20 %**.
 
 Les valeurs correspondent aux informations visibles dans la page
 [Codex Analytics](https://chatgpt.com/codex/cloud/settings/analytics#usage).
-
-<p align="center">
-  <img src="docs/images/codex-analytics-reference.png"
-       alt="Limites d'utilisation affichées dans Codex Analytics"
-       width="820">
-</p>
 
 ## Installation
 
@@ -110,7 +97,7 @@ plus récente**. Le détail des tokens d'entrée, de cache, de sortie et de
 raisonnement est disponible au survol.
 
 Ce nombre est informatif : il ne représente pas un total officiel de tokens
-facturés et ne remplace pas les quotas de 5 heures et hebdomadaire.
+facturés et ne remplace pas le quota hebdomadaire.
 
 ## Fonctionnement
 

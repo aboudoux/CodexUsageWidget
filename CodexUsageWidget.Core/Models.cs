@@ -25,7 +25,15 @@ public sealed record UsageSnapshot(
     RateLimitWindow? Secondary,
     decimal? Credits,
     string? PlanType,
-    DateTimeOffset CapturedAt);
+    DateTimeOffset CapturedAt)
+{
+    [JsonIgnore]
+    public RateLimitWindow? WeeklyLimit =>
+        new[] { Primary, Secondary }
+            .Where(window => window is not null)
+            .OrderByDescending(window => window!.WindowDurationMins ?? 0)
+            .FirstOrDefault();
+}
 
 public sealed record WidgetSettings
 {
