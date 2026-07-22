@@ -141,6 +141,9 @@ public partial class MainWindow : Window
         TokensText.Text = usage is null
             ? "--"
             : FormatCompactNumber(usage.TotalTokens);
+        WorkedTimeText.Text = usage is null
+            ? "--"
+            : FormatDuration(usage.TotalWorkedTime);
         TokensText.ToolTip = usage is null
             ? "Aucune conversation Codex locale trouvee."
             : $"Entree : {usage.InputTokens:N0}\n" +
@@ -148,6 +151,13 @@ public partial class MainWindow : Window
               $"Sortie : {usage.OutputTokens:N0}\n" +
               $"Raisonnement : {usage.ReasoningOutputTokens:N0}";
     }
+
+    private static string FormatDuration(TimeSpan duration) =>
+        duration.TotalHours >= 1
+            ? $"{(int)duration.TotalHours} h {duration.Minutes:00} min"
+            : duration.TotalMinutes >= 1
+                ? $"{(int)duration.TotalMinutes} min {duration.Seconds:00} s"
+                : $"{Math.Max(0, (int)duration.TotalSeconds)} s";
 
     private static string FormatCompactNumber(long value) =>
         value switch

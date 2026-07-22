@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Utilisation Codex"
         Width="310"
-        Height="255"
+        Height="290"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
@@ -124,19 +124,38 @@
             <Border Grid.Row="3"
                     Background="#2D2D2D"
                     CornerRadius="7"
-                    Padding="10,7"
+                    Padding="10,9"
                     Margin="0,8,0,0"
-                    ToolTip="Cumul de la conversation Codex locale la plus recente. Ce nombre n'est pas le quota de l'abonnement.">
-                <Grid>
-                    <TextBlock Text="Tokens - conversation recente"
+                    ToolTip="Informations issues de la conversation Codex locale la plus recente.">
+                <StackPanel>
+                    <TextBlock Text="Conversation recente"
+                               FontWeight="SemiBold"
+                               FontSize="12"
+                               Margin="0,0,0,8"/>
+                    <Grid ToolTip="Cumul de tokens de cette conversation. Ce nombre n'est pas le quota de l'abonnement.">
+                        <TextBlock Text="Tokens"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   FontSize="11"/>
+                        <TextBlock x:Name="TokensText"
+                                   Text="--"
+                                   HorizontalAlignment="Right"
+                                   FontWeight="Bold"
+                                   FontSize="14"/>
+                    </Grid>
+                    <Border Height="1"
+                            Background="#414141"
+                            Margin="0,7"/>
+                    <Grid ToolTip="Somme des intervalles entre le debut et la fin de chaque intervention Codex.">
+                        <TextBlock Text="Temps total travaillé"
                                Foreground="{StaticResource MutedBrush}"
                                FontSize="11"/>
-                    <TextBlock x:Name="TokensText"
-                               Text="--"
-                               HorizontalAlignment="Right"
-                               FontWeight="Bold"
-                               FontSize="14"/>
-                </Grid>
+                        <TextBlock x:Name="WorkedTimeText"
+                                   Text="--"
+                                   HorizontalAlignment="Right"
+                                   FontWeight="Bold"
+                                   FontSize="14"/>
+                    </Grid>
+                </StackPanel>
             </Border>
 
             <TextBlock Grid.Row="4"

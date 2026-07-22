@@ -23,6 +23,7 @@ Le widget affiche :
 - la date et l'heure de réinitialisation de la limite ;
 - le solde de crédits disponible, lorsqu'il est fourni par Codex ;
 - les tokens cumulés de la conversation locale la plus récente ;
+- le temps total travaillé sur cette conversation, hors pauses entre les interventions ;
 - un indicateur rouge lorsqu'un quota passe sous les **20 %**.
 
 Les valeurs correspondent aux informations visibles dans la page
@@ -98,6 +99,13 @@ raisonnement est disponible au survol.
 
 Ce nombre est informatif : il ne représente pas un total officiel de tokens
 facturés et ne remplace pas le quota hebdomadaire.
+
+### Temps travaillé
+
+Le temps total travaillé additionne la durée de chaque intervention Codex de la
+conversation locale la plus récente. Les périodes d'attente entre deux messages
+ne sont pas comptabilisées. Une intervention en cours est incluse jusqu'au
+dernier événement enregistré dans le journal local.
 
 ## Fonctionnement
 

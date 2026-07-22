@@ -29,6 +29,34 @@ public sealed class LocalTokenUsageReaderTests
             Assert.AreEqual(40, usage.CachedInputTokens);
             Assert.AreEqual(20, usage.OutputTokens);
             Assert.AreEqual(5, usage.ReasoningOutputTokens);
+            Assert.AreEqual(TimeSpan.Zero, usage.TotalWorkedTime);
+        }
+        finally
+        {
+            Directory.Delete(directory, recursive: true);
+        }
+    }
+
+    [TestMethod]
+    public async Task ReadLatestAsync_SumsCompletedAndActiveTaskDurations()
+    {
+        string directory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(directory);
+
+        try
+        {
+            string session = Path.Combine(directory, "session.jsonl");
+            string contents = string.Join('\n',
+                CreateEvent("2026-06-12T08:00:00Z", "task_started"),
+                CreateEvent("2026-06-12T08:02:30Z", "task_complete"),
+                CreateEvent("2026-06-12T12:00:00Z", "task_started"),
+                CreateLine(500, "2026-06-12T12:01:15Z"));
+            await File.WriteAllTextAsync(session, contents);
+
+            SessionTokenUsage? usage = await new LocalTokenUsageReader(directory).ReadLatestAsync();
+
+            Assert.IsNotNull(usage);
+            Assert.AreEqual(TimeSpan.FromMinutes(3.75), usage.TotalWorkedTime);
         }
         finally
         {
@@ -47,8 +75,14 @@ public sealed class LocalTokenUsageReaderTests
         Assert.IsNull(usage);
     }
 
-    private static string CreateLine(long totalTokens) =>
+    private static string CreateLine(long totalTokens, string timestamp = "2026-06-12T08:22:21.090Z") =>
         """
-        {"timestamp":"2026-06-12T08:22:21.090Z","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":100,"cached_input_tokens":40,"output_tokens":20,"reasoning_output_tokens":5,"total_tokens":TOTAL}}}}
-        """.Replace("TOTAL", totalTokens.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        {"timestamp":"TIMESTAMP","type":"event_msg","payload":{"type":"token_count","info":{"total_token_usage":{"input_tokens":100,"cached_input_tokens":40,"output_tokens":20,"reasoning_output_tokens":5,"total_tokens":TOTAL}}}}
+        """.Replace("TIMESTAMP", timestamp)
+           .Replace("TOTAL", totalTokens.ToString(System.Globalization.CultureInfo.InvariantCulture));
+
+    private static string CreateEvent(string timestamp, string type) =>
+        """
+        {"timestamp":"TIMESTAMP","type":"event_msg","payload":{"type":"TYPE"}}
+        """.Replace("TIMESTAMP", timestamp).Replace("TYPE", type);
 }

@@ -9,7 +9,8 @@ public sealed record SessionTokenUsage(
     long OutputTokens,
     long ReasoningOutputTokens,
     long TotalTokens,
-    DateTimeOffset CapturedAt);
+    DateTimeOffset CapturedAt,
+    TimeSpan TotalWorkedTime);
 
 public interface ITokenUsageProvider
 {
@@ -18,7 +19,6 @@ public interface ITokenUsageProvider
 
 public sealed class LocalTokenUsageReader : ITokenUsageProvider
 {
-    private const int TailSizeBytes = 2 * 1024 * 1024;
     private readonly string _sessionsPath;
 
     public LocalTokenUsageReader(string? sessionsPath = null)
@@ -52,24 +52,19 @@ public sealed class LocalTokenUsageReader : ITokenUsageProvider
         CancellationToken cancellationToken = default)
     {
         await using var stream = new FileStream(
-            filePath,
-            FileMode.Open,
-            FileAccess.Read,
-            FileShare.ReadWrite | FileShare.Delete,
-            bufferSize: 4096,
-            useAsync: true);
+            filePath, FileMode.Open, FileAccess.Read,
+            FileShare.ReadWrite | FileShare.Delete, 4096, useAsync: true);
+        using var reader = new StreamReader(stream, Encoding.UTF8);
 
-        long start = Math.Max(0, stream.Length - TailSizeBytes);
-        stream.Seek(start, SeekOrigin.Begin);
-        byte[] buffer = new byte[stream.Length - start];
-        int bytesRead = await stream.ReadAsync(buffer, cancellationToken);
-        string text = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-        string[] lines = text.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        SessionTokenUsage? latestUsage = null;
+        DateTimeOffset? taskStartedAt = null;
+        DateTimeOffset? latestEventAt = null;
+        TimeSpan totalWorkedTime = TimeSpan.Zero;
 
-        for (int index = lines.Length - 1; index >= 0; index--)
+        while (await reader.ReadLineAsync(cancellationToken) is string rawLine)
         {
-            string line = lines[index].Trim();
-            if (!line.Contains("\"type\":\"token_count\"", StringComparison.Ordinal))
+            string line = rawLine.Trim();
+            if (line.Length == 0)
             {
                 continue;
             }
@@ -78,23 +73,47 @@ public sealed class LocalTokenUsageReader : ITokenUsageProvider
             {
                 using JsonDocument document = JsonDocument.Parse(line);
                 JsonElement root = document.RootElement;
-                JsonElement usage = root
-                    .GetProperty("payload")
-                    .GetProperty("info")
-                    .GetProperty("total_token_usage");
+                if (!TryGetTimestamp(root, out DateTimeOffset timestamp))
+                {
+                    continue;
+                }
 
-                DateTimeOffset capturedAt = root.TryGetProperty("timestamp", out JsonElement timestamp) &&
-                    DateTimeOffset.TryParse(timestamp.GetString(), out DateTimeOffset parsed)
-                        ? parsed
-                        : new DateTimeOffset(File.GetLastWriteTimeUtc(filePath), TimeSpan.Zero);
-
-                return new SessionTokenUsage(
-                    usage.GetProperty("input_tokens").GetInt64(),
-                    usage.GetProperty("cached_input_tokens").GetInt64(),
-                    usage.GetProperty("output_tokens").GetInt64(),
-                    usage.GetProperty("reasoning_output_tokens").GetInt64(),
-                    usage.GetProperty("total_tokens").GetInt64(),
-                    capturedAt);
+                latestEventAt = timestamp;
+                if (root.TryGetProperty("payload", out JsonElement payload) &&
+                    payload.TryGetProperty("type", out JsonElement typeElement))
+                {
+                    string? type = typeElement.GetString();
+                    if (type == "task_started")
+                    {
+                        if (taskStartedAt is DateTimeOffset previousStart && timestamp > previousStart)
+                        {
+                            totalWorkedTime += timestamp - previousStart;
+                        }
+                        taskStartedAt = timestamp;
+                    }
+                    else if ((type == "task_complete" || type == "turn_aborted") &&
+                             taskStartedAt is DateTimeOffset start)
+                    {
+                        if (timestamp > start)
+                        {
+                            totalWorkedTime += timestamp - start;
+                        }
+                        taskStartedAt = null;
+                    }
+                    else if (type == "token_count" &&
+                             payload.TryGetProperty("info", out JsonElement info) &&
+                             info.TryGetProperty("total_token_usage", out JsonElement usage))
+                    {
+                        latestUsage = new SessionTokenUsage(
+                            usage.GetProperty("input_tokens").GetInt64(),
+                            usage.GetProperty("cached_input_tokens").GetInt64(),
+                            usage.GetProperty("output_tokens").GetInt64(),
+                            usage.GetProperty("reasoning_output_tokens").GetInt64(),
+                            usage.GetProperty("total_tokens").GetInt64(),
+                            timestamp,
+                            TimeSpan.Zero);
+                    }
+                }
             }
             catch (JsonException)
             {
@@ -102,6 +121,20 @@ public sealed class LocalTokenUsageReader : ITokenUsageProvider
             }
         }
 
-        return null;
+        if (taskStartedAt is DateTimeOffset activeStart && latestEventAt > activeStart)
+        {
+            totalWorkedTime += latestEventAt.Value - activeStart;
+        }
+
+        return latestUsage is null
+            ? null
+            : latestUsage with { TotalWorkedTime = totalWorkedTime };
+    }
+
+    private static bool TryGetTimestamp(JsonElement root, out DateTimeOffset timestamp)
+    {
+        timestamp = default;
+        return root.TryGetProperty("timestamp", out JsonElement value) &&
+               DateTimeOffset.TryParse(value.GetString(), out timestamp);
     }
 }
