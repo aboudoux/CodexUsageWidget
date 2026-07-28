@@ -73,16 +73,20 @@ public sealed class LocalTokenUsageReader : ITokenUsageProvider
             {
                 using JsonDocument document = JsonDocument.Parse(line);
                 JsonElement root = document.RootElement;
-                if (!TryGetTimestamp(root, out DateTimeOffset timestamp))
+                if (root.ValueKind != JsonValueKind.Object ||
+                    !TryGetTimestamp(root, out DateTimeOffset timestamp))
                 {
                     continue;
                 }
 
                 latestEventAt = timestamp;
                 if (root.TryGetProperty("payload", out JsonElement payload) &&
+                    payload.ValueKind == JsonValueKind.Object &&
                     payload.TryGetProperty("type", out JsonElement typeElement))
                 {
-                    string? type = typeElement.GetString();
+                    string? type = typeElement.ValueKind == JsonValueKind.String
+                        ? typeElement.GetString()
+                        : null;
                     if (type == "task_started")
                     {
                         if (taskStartedAt is DateTimeOffset previousStart && timestamp > previousStart)
@@ -102,16 +106,11 @@ public sealed class LocalTokenUsageReader : ITokenUsageProvider
                     }
                     else if (type == "token_count" &&
                              payload.TryGetProperty("info", out JsonElement info) &&
-                             info.TryGetProperty("total_token_usage", out JsonElement usage))
+                             info.ValueKind == JsonValueKind.Object &&
+                             info.TryGetProperty("total_token_usage", out JsonElement usage) &&
+                             TryReadTokenUsage(usage, timestamp, out SessionTokenUsage? tokenUsage))
                     {
-                        latestUsage = new SessionTokenUsage(
-                            usage.GetProperty("input_tokens").GetInt64(),
-                            usage.GetProperty("cached_input_tokens").GetInt64(),
-                            usage.GetProperty("output_tokens").GetInt64(),
-                            usage.GetProperty("reasoning_output_tokens").GetInt64(),
-                            usage.GetProperty("total_tokens").GetInt64(),
-                            timestamp,
-                            TimeSpan.Zero);
+                        latestUsage = tokenUsage;
                     }
                 }
             }
@@ -135,6 +134,42 @@ public sealed class LocalTokenUsageReader : ITokenUsageProvider
     {
         timestamp = default;
         return root.TryGetProperty("timestamp", out JsonElement value) &&
+               value.ValueKind == JsonValueKind.String &&
                DateTimeOffset.TryParse(value.GetString(), out timestamp);
+    }
+
+    private static bool TryReadTokenUsage(
+        JsonElement usage,
+        DateTimeOffset timestamp,
+        out SessionTokenUsage? tokenUsage)
+    {
+        tokenUsage = null;
+        if (usage.ValueKind != JsonValueKind.Object ||
+            !TryGetInt64(usage, "input_tokens", out long inputTokens) ||
+            !TryGetInt64(usage, "cached_input_tokens", out long cachedInputTokens) ||
+            !TryGetInt64(usage, "output_tokens", out long outputTokens) ||
+            !TryGetInt64(usage, "reasoning_output_tokens", out long reasoningOutputTokens) ||
+            !TryGetInt64(usage, "total_tokens", out long totalTokens))
+        {
+            return false;
+        }
+
+        tokenUsage = new SessionTokenUsage(
+            inputTokens,
+            cachedInputTokens,
+            outputTokens,
+            reasoningOutputTokens,
+            totalTokens,
+            timestamp,
+            TimeSpan.Zero);
+        return true;
+    }
+
+    private static bool TryGetInt64(JsonElement parent, string propertyName, out long value)
+    {
+        value = default;
+        return parent.TryGetProperty(propertyName, out JsonElement element) &&
+               element.ValueKind == JsonValueKind.Number &&
+               element.TryGetInt64(out value);
     }
 }

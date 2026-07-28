@@ -1,5 +1,5 @@
 #define MyAppName "Codex Usage Widget"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.2.1"
 #define MyAppPublisher "Codex Usage Widget"
 #define MyAppExeName "CodexUsageWidget.exe"
 
